@@ -2,10 +2,11 @@ require "uuid"
 require "uuid/json"
 require "json"
 require "http/web_socket"
+require "kilt"
 
 abstract class LiveView
-  VERSION = "0.1.0"
-  CHANNELS = Hash(String, Channel).new
+  VERSION     = "0.1.0"
+  CHANNELS    = Hash(String, Channel).new
   GC_INTERVAL = 30.seconds
 
   # GC channels that have been disconnected
@@ -52,14 +53,16 @@ abstract class LiveView
   # 1-2 of them, making about half of their definitions worthless.
   def mount(socket : HTTP::WebSocket)
   end
+
   def unmount(socket : HTTP::WebSocket)
   end
+
   def handle_event(event_name : String, data : String, socket : HTTP::WebSocket)
   end
 
   macro template(filename)
     def render_to(io)
-      ECR.embed {{filename}}, io
+      Kilt.embed {{filename}}, io
     end
   end
 
@@ -78,12 +81,14 @@ abstract class LiveView
 
     json = {
       render: buffer.to_s,
-      id: live_view_id,
+      id:     live_view_id,
     }.to_json
 
     socket.send json
 
-  # If we can't send to the socket, it's probably closed
+    # If we can't send to the socket, it's probably closed
+
+
   rescue ex : IO::Error
   end
 
@@ -160,7 +165,7 @@ abstract class LiveView
 
     @sockets = Set(HTTP::WebSocket).new
     @has_mounted = false
-    @created_at = Time.utc
+    @created_at = Time.local
 
     def initialize(@live_view : LiveView)
     end
@@ -181,7 +186,7 @@ abstract class LiveView
     end
 
     def age
-      Time.utc - @created_at
+      Time.local - @created_at
     end
 
     def disconnected?

@@ -4,6 +4,10 @@ version: 0.1.0
 authors:
   - Jamie Gaskins <jgaskins@gmail.com>
 
-crystal: 0.27.2
+crystal: 0.35.1
+
+dependencies:
+  kilt:
+    github: jeromegn/kilt
 
 license: MIT
